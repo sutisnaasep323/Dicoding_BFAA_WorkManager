@@ -28,11 +28,18 @@ class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(contex
 
     private var resultStatus: Result? = null
 
+    /*
+    Metode doWork adalah metode yang akan dipanggil ketika WorkManager berjalan. Kode di dalamnya
+    akan dijalankan di background thread secara otomatis. Metode ini juga mengembalikan nilai berupa
+    Result yang berfungsi untuk mengetahui status WorkManager yang berjalan. seperti Result.success(),
+    Result.failure(), dan Result.retry()
+     */
     override fun doWork(): Result {
-        val dataCity = inputData.getString(EXTRA_CITY)
+        val dataCity = inputData.getString(EXTRA_CITY) // getData dari key EXTRA_CITY (tipe data dan key yang dimasukkan harus sama persis)
         return getCurrentWeather(dataCity)
     }
 
+    // LoopJ adalah salah library untuk menangani koneksi ke API.  Selain LoopJ ada Retrofit, Volley, FastAndroidNetworking dsb
     private fun getCurrentWeather(city: String?): Result {
         Log.d(TAG, "getCurrentWeather: Mulai.....")
         Looper.prepare()
@@ -61,11 +68,11 @@ class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(contex
                     val message = "$currentWeather, $description with $temperature celsius"
                     showNotification(title, message)
                     Log.d(TAG, "onSuccess: Selesai.....")
-                    resultStatus = Result.success()
+                    resultStatus = Result.success() // Dengan ini, kita bisa menentukan kembalian dari proses ini apakah berhasil atau gagal dengan menggunakan kode tersebut
                 } catch (e: Exception) {
                     showNotification("Get Current Weather Not Success", e.message)
                     Log.d(TAG, "onSuccess: Gagal.....")
-                    resultStatus = Result.failure()
+                    resultStatus = Result.failure() // Dengan ini, kita bisa menentukan kembalian dari proses ini apakah berhasil atau gagal dengan menggunakan kode tersebut
                 }
             }
 
@@ -78,7 +85,7 @@ class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(contex
                 Log.d(TAG, "onFailure: Gagal.....")
                 // ketika proses gagal, maka jobFinished diset dengan parameter true. Yang artinya job perlu di reschedule
                 showNotification("Get Current Weather Failed", error.message)
-                resultStatus = Result.failure()
+                resultStatus = Result.failure() // Dengan begitu, kita bisa menentukan kembalian dari proses ini apakah berhasil atau gagal dengan menggunakan kode tersebut
             }
         })
         return resultStatus as Result
